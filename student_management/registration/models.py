@@ -27,6 +27,6 @@ class Student(models.Model):
         max_length=20)
     
     def __str__(self):
-        return f"{self.stduent_id} - {self.first_name} - {self.last_name}"
+        return f"{self.student_id} - {self.first_name} - {self.last_name}"
 
         
