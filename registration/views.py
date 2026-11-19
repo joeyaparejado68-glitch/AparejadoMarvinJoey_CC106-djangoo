@@ -1,21 +1,93 @@
-from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import StudentForm
 from .models import Student
 
 
 def student_registration(request):
     if request.method == 'POST':
-        Student.objects.create(
-            student_id=request.POST.get('student_id'),
-            first_name=request.POST.get('first_name'),
-            last_name=request.POST.get('last_name'),
-            gender=request.POST.get('gender'),
-            date_of_birth=request.POST.get('date_of_birth'),
-            contact_number=request.POST.get('contact_number'),
-        )
-        return redirect('registration_success')
+        form = StudentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('registration_success')
+    else:
+        form = StudentForm()
 
-    return render(request, 'registration/registration.html')
+    return render(request, 'registration/registration.html', {'form': form})
 
 
 def registration_success(request):
     return render(request, 'registration/success.html')
+
+
+def student_list(request):
+    students = Student.objects.order_by('last_name', 'first_name')
+    search_query = request.GET.get('q', '').strip()
+    if search_query:
+        students = students.filter(
+            Q(student_id__icontains=search_query)
+            | Q(first_name__icontains=search_query)
+            | Q(last_name__icontains=search_query)
+        )
+
+    return render(request, 'registration/student_list.html', {
+        'students': students,
+        'search_query': search_query,
+    })
+
+
+def student_detail(request, pk):
+    student = get_object_or_404(Student, pk=pk)
+    return render(request, 'registration/student.detail.html', {'student': student})
+
+
+def student_create(request):
+    if request.method == 'POST':
+        form = StudentForm(request.POST)
+        if form.is_valid():
+            student = form.save()
+            return redirect('student_detail', pk=student.pk)
+    else:
+        form = StudentForm()
+
+    return render(request, 'registration/student_form.html', {
+        'form': form,
+        'title': 'Add student',
+    })
+
+
+def student_update(request, pk):
+    student = get_object_or_404(Student, pk=pk)
+    if request.method == 'POST':
+        form = StudentForm(request.POST, instance=student)
+        if form.is_valid():
+            form.save()
+            return redirect('student_detail', pk=student.pk)
+    else:
+        form = StudentForm(instance=student)
+
+    return render(request, 'registration/student_form.html', {
+        'form': form,
+        'student': student,
+        'title': 'Edit student',
+    })
+
+
+def student_delete(request, pk):
+    student = get_object_or_404(Student, pk=pk)
+    if request.method == 'POST':
+        student.delete()
+        return redirect('student_list')
+
+    return render(request, 'registration/student_confirm_delete.html', {'student': student})
+
+
+def staff_check(user):
+    return user.is_authenticated and user.is_staff
+
+
+@user_passes_test(staff_check, login_url='login')
+def staff_dashboard(request):
+    return render(request, 'registration/dashboard.html')

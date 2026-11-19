@@ -2,48 +2,50 @@
 <html>
 <head>
     <title>Student Registration</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'registration/style.css' %}">
 </head>
 <body>
     <h1>Student Registration</h1>
 
     <form method="post">
         {% csrf_token %}
+        {{ form.non_field_errors }}
 
-        <label>Student ID:</label>
-        <input type="text" name="student_id" required>
-
-        <br><br>
-
-        <label>First Name:</label>
-        <input type="text" name="first_name" required>
-
-        <br><br>
-
-        <label>Last Name:</label>
-        <input type="text" name="last_name" required>
-
-        <br><br>
-
-        <label>Gender:</label>
-        <select name="gender" required>
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-        </select>
-
-        <br><br>
-
-        <label>Date of Birth:</label>
-        <input type="date" name="date_of_birth" required>
-
-        <br><br>
-
-        <label>Contact Number:</label>
-        <input type="text" name="contact_number" required>
-
-        <br><br>
+        <p>
+            <label for="{{ form.student_id.id_for_label }}">Student ID:</label>
+            {{ form.student_id }}
+            {{ form.student_id.errors }}
+        </p>
+        <p>
+            <label for="{{ form.first_name.id_for_label }}">First Name:</label>
+            {{ form.first_name }}
+            {{ form.first_name.errors }}
+        </p>
+        <p>
+            <label for="{{ form.last_name.id_for_label }}">Last Name:</label>
+            {{ form.last_name }}
+            {{ form.last_name.errors }}
+        </p>
+        <p>
+            <label for="{{ form.gender.id_for_label }}">Gender:</label>
+            {{ form.gender }}
+            {{ form.gender.errors }}
+        </p>
+        <p>
+            <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth:</label>
+            {{ form.date_of_birth }}
+            {{ form.date_of_birth.errors }}
+        </p>
+        <p>
+            <label for="{{ form.contact_number.id_for_label }}">Contact Number:</label>
+            {{ form.contact_number }}
+            {{ form.contact_number.errors }}
+        </p>
 
         <button type="submit">Register</button>
     </form>
+
+    <p><a href="{% url 'student_list' %}">View registered students</a></p>
 </body>
 </html>
